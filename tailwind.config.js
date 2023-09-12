@@ -109,7 +109,8 @@ module.exports = withMT({
       },
       fontFamily: {
         ShabnamFD: ["Shabnam-FD", "Tahome"],
-        Shabnam: ["Shabnam", "Tahome"],
+        Shabnam: ["Shabnam", "Tahome"], 
+        Morabba: ["Morabba", "Tahome"],
       },
       boxShadow: {
         "3xl": "14px 17px 40px 4px",

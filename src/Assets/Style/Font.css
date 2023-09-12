@@ -101,3 +101,12 @@
 		 url('../Fonts/Shabnam-FD/Shabnam.woff') format('woff'),  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
 		 url('../Fonts/Shabnam-FD/Shabnam.ttf') format('truetype');
 }
+
+/* ----------------------------- Morabba ----------------------------- */
+@font-face {
+	font-family: Morabba;
+	font-style: normal;
+	font-weight: bold;
+	src: url('../Fonts/Morabba-Bold.woff') format('woff'); /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+		
+}
