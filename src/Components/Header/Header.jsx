@@ -1,24 +1,47 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { MdLocationOn } from "react-icons/md";
 import { HiCalendar, HiSearch, HiMinus, HiPlus } from "react-icons/hi";
 import VerticalSeparator from "../Common/VerticalSeparator";
+import useOutsideClick from "../../Hooks/useOutsideClick";
+import persian from "react-date-object/calendars/persian";
+import persian_fa from "react-date-object/locales/persian_fa";
+import Calendar, { DateObject } from "react-multi-date-picker";
+import { createSearchParams, json, useNavigate, useSearchParams } from "react-router-dom";
 
 function Header({ sidebarOpen, setSidebarOpen }) {
+  const navigate = useNavigate();
   const [destination, setDestination] = useState("");
+  const [dateValues, setDateValues] = useState([
+    [new DateObject().set({ day: 1 }), new DateObject().set({ day: 3 })],
+    [new DateObject().set({ day: 6 }), new DateObject().set({ day: 12 })],
+  ]);
   const [openReservOption, setOpenReservOption] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [options, setOptions] = useState({
     adult: 1,
     children: 0,
     room: 1,
   });
-  const handleOptions = (name , operation) => {
-     setOptions((prev) => {
-      return{
-        ...prev ,
-        [name] : operation === "inc" ? options[name] + 1: options[name] - 1,
+  const handleOptions = (name, operation) => {
+    setOptions((prev) => {
+      return {
+        ...prev,
+        [name]: operation === "inc" ? options[name] + 1 : options[name] - 1,
       };
-     });
+    });
   };
+  const handleSearch = () => {
+    const encodedParams = createSearchParams({
+      dateValues:JSON.stringify(dateValues),
+      destination,
+      options:JSON.stringify(options),
+    })
+    //note: => setSearchParams(encodedParams);
+     navigate({
+      pathname: "/hotles",
+      search: encodedParams.toString()
+     });
+  }
   return (
     <header className="sticky top-0 bg-white border-b border-slate-200 z-30">
       <div className="p-4 sm:p-6">
@@ -42,26 +65,54 @@ function Header({ sidebarOpen, setSidebarOpen }) {
             <div className="flex flex-1 justify-between items-center">
               <div className="flex justify-center items-center">
                 <HiCalendar className="ml-2 text-2xl" />
-                <div className="font-ShabnamFD">1402/05/02</div>
+                <div className="font-ShabnamFD">
+                  <Calendar
+                   placeholder="انتخاب تاریخ رزرو ..."
+                    value={dateValues}
+                    onChange={setDateValues}
+                    dateSeparator=" تا "
+                    range
+                    calendar={persian}
+                    locale={persian_fa}
+                    minDate={new Date()}
+                    moveRangeOnFirstSelection={true}
+                    calendarPosition="bottom-right"
+                  />
+                </div>
               </div>
               <VerticalSeparator />
             </div>
-            <div className="flex flex-1 justify-between items-center">
+            <div className="flex flex-1 justify-between items-center relative">
               <div
-                id=""
-                className="bg-violet-800 text-white relative cursor-pointer px-3 py-2 rounded-lg font-bold text-base"
+                id="optionDropDown"
+                className="text-violet-800 w-full max-w-xs flex justify-between items-center border border-violet-800 cursor-pointer px-3 py-2 rounded-lg font-bold text-base"
                 onClick={() => setOpenReservOption(!openReservOption)}
               >
-                <span className="font-ShabnamFD mx-1 text-lg text-green-500 bg-white p-1 w-3 h-3 rounded-lg">{options.adult}</span> بزرگسال |
-                <span className="font-ShabnamFD mx-1 text-lg text-green-500 bg-white p-1 w-3 h-3 rounded-lg">{options.children}</span> خردسال |
-                <span className="font-ShabnamFD mx-1 text-lg text-green-500 bg-white p-1 w-3 h-3 rounded-lg">{options.room}</span> اتاق
-                {openReservOption && <GuestOptionList handleOptions={handleOptions} options={options} />}
+                <span className="font-ShabnamFD text-lg text-green-500">
+                  {options.adult}
+                </span>
+                بزرگسال <span className="mx-1">|</span>
+                <span className="font-ShabnamFD text-lg text-green-500">
+                  {options.children}
+                </span>
+                خردسال <span className="mx-1">|</span>
+                <span className="font-ShabnamFD text-lg text-green-500">
+                  {options.room}
+                </span>
+                اتاق
               </div>
+              {openReservOption && (
+                <GuestOptionList
+                  setOpenReservOption={setOpenReservOption}
+                  handleOptions={handleOptions}
+                  options={options}
+                />
+              )}
               <VerticalSeparator />
             </div>
           </div>
           <div className="">
-            <button className="bg-violet-900 text-white w-10 h-10 rounded-xl flex justify-center items-center">
+            <button onClick={handleSearch} className="bg-violet-900 text-white w-10 h-10 rounded-xl flex justify-center items-center">
               <HiSearch className="text-2xl" />
             </button>
           </div>
@@ -99,27 +150,55 @@ function Header({ sidebarOpen, setSidebarOpen }) {
 
 export default Header;
 
-function GuestOptionList({ options , handleOptions}) {
+function GuestOptionList({ options, handleOptions, setOpenReservOption }) {
+  const optionsRef = useRef();
+  useOutsideClick(optionsRef, "optionDropDown", () =>
+    setOpenReservOption(false)
+  );
   return (
-    <div className="absolute w-full right-0 top-12 shadow-xl p-3 rounded-lg border border-violet-200 bg-white text-violet-900">
-      <OptionItem handleOptions={handleOptions} type="بزرگسال" options={options} minLimit={1} />
-      <OptionItem handleOptions={handleOptions} type="خردسال" options={options} minLimit={0} />
-      <OptionItem handleOptions={handleOptions} type="اتاق" options={options} minLimit={1} />
+    <div
+      ref={optionsRef}
+      className="absolute max-w-xs w-full right-0 top-14 shadow-xl p-3 rounded-lg border border-violet-200 bg-white text-violet-900"
+    >
+      <OptionItem
+        handleOptions={handleOptions}
+        name="بزرگسال"
+        type="adult"
+        options={options}
+        minLimit={1}
+      />
+      <OptionItem
+        handleOptions={handleOptions}
+        name="خردسال"
+        type="children"
+        options={options}
+        minLimit={0}
+      />
+      <OptionItem
+        handleOptions={handleOptions}
+        name="اتاق"
+        type="room"
+        options={options}
+        minLimit={1}
+      />
     </div>
   );
 }
 
-function OptionItem({ options, type, minLimit , handleOptions}) {
+function OptionItem({ options, type, name, minLimit, handleOptions }) {
   return (
     <div className="w-full flex justify-between items-center my-2 bg-slate-50 p-1 rounded-lg">
-      <p>{type}</p>
+      <p>{name}</p>
       <div className="flex justify-between items-center">
-        <button onClick={() => handleOptions(type , "inc")} className="bg-violet-100 hover:bg-violet-300 transition-all ease-linear duration-300 w-8 h-8 text-violet-900 rounded-lg flex justify-center items-center ml-2">
+        <button
+          onClick={() => handleOptions(type, "inc")}
+          className="bg-violet-100 hover:bg-violet-300 transition-all ease-linear duration-300 w-8 h-8 text-violet-900 rounded-lg flex justify-center items-center ml-2"
+        >
           <HiPlus className="text-xl" />
         </button>
         <span className="font-ShabnamFD">{options[type]}</span>
         <button
-          onClick={() => handleOptions(type , "dec")}
+          onClick={() => handleOptions(type, "dec")}
           className="bg-violet-100 hover:bg-violet-300 w-8 h-8 text-violet-900 rounded-lg flex justify-center items-center mr-2"
           disabled={options[type] <= minLimit}
         >

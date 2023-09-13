@@ -1,11 +1,12 @@
 import React from 'react';
+import { FaHotel } from 'react-icons/fa';
 
 function WelcomeBanner() {
   return (
     <div className="relative bg-violet-200 p-4 sm:p-10 rounded-md overflow-hidden mb-8">
-
      {/* Content */}
-      <div className="relative">
+      <div className="relative flex items-center">
+       <FaHotel className='text-6xl ml-2'/>
         <h1 className="text-2xl md:text-3xl text-violet-800 font-bold mb-1">سیستم رزرو هتل</h1>
       </div>
       {/* Background illustration */}
