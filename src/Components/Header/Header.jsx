@@ -6,17 +6,17 @@ import useOutsideClick from "../../Hooks/useOutsideClick";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import Calendar, { DateObject } from "react-multi-date-picker";
-import { createSearchParams, json, useNavigate, useSearchParams } from "react-router-dom";
+import { createSearchParams, useNavigate, useSearchParams } from "react-router-dom";
 
 function Header({ sidebarOpen, setSidebarOpen }) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [destination, setDestination] = useState(searchParams.get("destination") || "");
   const navigate = useNavigate();
-  const [destination, setDestination] = useState("");
   const [dateValues, setDateValues] = useState([
     [new DateObject().set({ day: 1 }), new DateObject().set({ day: 3 })],
     [new DateObject().set({ day: 6 }), new DateObject().set({ day: 12 })],
   ]);
   const [openReservOption, setOpenReservOption] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
   const [options, setOptions] = useState({
     adult: 1,
     children: 0,
@@ -38,8 +38,8 @@ function Header({ sidebarOpen, setSidebarOpen }) {
     })
     //note: => setSearchParams(encodedParams);
      navigate({
-      pathname: "/hotles",
-      search: encodedParams.toString()
+      pathname: "/hotels",
+      search: encodedParams.toString(),
      });
   }
   return (
